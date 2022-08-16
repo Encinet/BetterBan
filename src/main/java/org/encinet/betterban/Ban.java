@@ -1,0 +1,134 @@
+package org.encinet.betterban;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import static org.encinet.betterban.Config.*;
+
+public class Ban implements TabExecutor {
+    @Override
+    public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        if (!sender.hasPermission("bb.admin")) {
+            sender.sendMessage(message + "§c没有权限");
+            return true;
+        } else if (args.length < 1 || "help".equals(args[0])) {
+            for (String now : help) {
+                sender.sendMessage(now);
+            }
+            return true;
+        }
+        try {
+            // /bb <ID> <time> [reason]
+            OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
+            switch (args.length) {
+                case 1 -> sender.sendMessage(message + "请指定时间");
+                case 2 -> {
+                    Long l = getData(args[1]);
+                    if (l == null) {
+                        player.banPlayer(getReason("", l), sender.getName());// 永封{
+                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                    } else {
+                        player.banPlayer(getReason("", l), new Date(l), sender.getName());
+                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                    }
+                }
+                case 3 -> {
+                    StringBuilder reason = new StringBuilder();
+                    for (int i = 2; i < args.length; i++) {
+                        reason.append(args[i]).append(" ");
+                    }
+                    Long l = getData(args[1]);
+                    if (l == null) {
+                        player.banPlayer(getReason(String.valueOf(reason), l), sender.getName());// 永封
+                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                    } else {
+                        player.banPlayer(getReason(String.valueOf(reason), l), new Date(l), sender.getName());
+                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                    }
+                }
+            }
+        } catch (RuntimeException e) {
+            sender.sendMessage(message + "出错了呢qwq");
+        }
+        return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+        List<String> list = new ArrayList<>();
+        switch (args.length) {
+            case 1 -> {
+                for (Player n : Bukkit.getOnlinePlayers()) {
+                    list.add(n.getName());
+                }
+            }
+            case 2 -> {
+                if (args[1].startsWith("d")) {
+                    list.add("d:2000/1/1");
+                } else if (args[1].startsWith("l")) {
+                    list.add("l:1s");
+                    list.add("l:1m");
+                    list.add("l:1h");
+                    list.add("l:1d");
+                } else {
+                    list.add("d:2000/1/1");
+                    list.add("l:1s");
+                }
+            }
+            case 3 -> list.add("[reason]");
+        }
+        return list;
+    }
+
+    public static String getReason(String text, Long time) {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String textTime = (time == 0) ? "永封" : ft.format(time);
+        if (Objects.equals(text, "")) {
+            return (prefix + "\n" + suffix).replace("%time%", textTime);
+        } else return (prefix + "\n" + reason.replace("%reason%", text) + "\n" + suffix).replace("%time%", textTime);
+    }
+
+    public static Long getData(String text) {
+        // d:2022/8/16
+        // l:1d
+        if (text.startsWith("d:")) {
+            text = text.substring(2);
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy/MM/dd");
+            Date date;
+            try {
+                date = ft.parse(text);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return date.getTime();
+        } else if (text.startsWith("l:")) {
+            // s秒 m分 h小时 d天
+            long l = Long.parseLong(text.substring(2, text.length() - 1));
+            switch (text.substring(text.length() - 1)) {
+                case "s":
+                    return System.currentTimeMillis() + (l * 1000);
+                case "m":
+                    return System.currentTimeMillis() + (l * 60000);
+                case "h":
+                    return System.currentTimeMillis() + (l * 3600000);
+                case "d":
+                    return System.currentTimeMillis() + (l * 86400000);
+            }
+        } else if ("forever".equals(text)) {
+            return (long) 0;
+        }
+        return null;
+    }
+}
