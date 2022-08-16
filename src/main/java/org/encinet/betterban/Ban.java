@@ -35,8 +35,8 @@ public class Ban implements TabExecutor {
             switch (args.length) {
                 case 1 -> sender.sendMessage(message + "请指定时间");
                 case 2 -> {
-                    Long l = getData(args[1]);
-                    if (l == null) {
+                    long l = getData(args[1]);
+                    if (l == 0) {
                         player.banPlayer(getReason("", l), sender.getName());// 永封{
                         sender.sendMessage(message + "封禁" + player.getName() + "成功");
                     } else {
@@ -49,8 +49,8 @@ public class Ban implements TabExecutor {
                     for (int i = 2; i < args.length; i++) {
                         reason.append(args[i]).append(" ");
                     }
-                    Long l = getData(args[1]);
-                    if (l == null) {
+                    long l = getData(args[1]);
+                    if (l == 0) {
                         player.banPlayer(getReason(String.valueOf(reason), l), sender.getName());// 永封
                         sender.sendMessage(message + "封禁" + player.getName() + "成功");
                     } else {
@@ -84,6 +84,7 @@ public class Ban implements TabExecutor {
                     list.add("l:1d");
                 } else {
                     list.add("d:2000/1/1");
+                    list.add("forever");
                     list.add("l:1s");
                 }
             }
@@ -129,6 +130,6 @@ public class Ban implements TabExecutor {
         } else if ("forever".equals(text)) {
             return (long) 0;
         }
-        return null;
+        return (long) 0;
     }
 }
