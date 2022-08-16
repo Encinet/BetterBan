@@ -29,9 +29,13 @@ public class Ban implements TabExecutor {
             }
             return true;
         }
+        // /bb <ID> <time> [reason]
+        OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
+        if (player.isBanned()) {
+            sender.sendMessage(message + "此玩家已处于封禁状态");
+            return true;
+        }
         try {
-            // /bb <ID> <time> [reason]
-            OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
             switch (args.length) {
                 case 1 -> sender.sendMessage(message + "请指定时间");
                 case 2 -> {
