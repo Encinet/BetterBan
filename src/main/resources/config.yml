@@ -1,6 +1,13 @@
-message: " &6Better&fBan &8>> &r"
+message: " &l&6Better&fBan &r&8>> &r"
+Sentence-notice:
+  enable: true
+  text: |
+    ----- &l&6Better&fBan -----
+    &6处理者 &r&8>> &f%executor%
+    &6封禁玩家 &r&8>> &f%executed%
+    &6原因 &r&8>> &f%reason%
 help:
-  - "&f----- &6Better&eban 帮助 &f-----"
+  - "&f----- &6Better&fban &e帮助 &f-----"
   - "&6/bb &7<ID> &7<time> &e[reason] &f- 封禁玩家"
   - "&6参数&etime&6说明&7:"
   - "&6d: &6后接日期 格式为 &e年/月/日"
@@ -15,7 +22,7 @@ prefix: |-
   &c你已被服务器封禁
 reason: |-
   &e原因
-  %reason%
+  &e%reason%
 suffix: |-
   &c解封日期: %time%
   如有异议 在QQ群1138627074向管理员申诉

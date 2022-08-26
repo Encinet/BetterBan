@@ -1,5 +1,6 @@
 package org.encinet.betterban;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -38,29 +39,24 @@ public class Ban implements TabExecutor {
         try {
             switch (args.length) {
                 case 1 -> sender.sendMessage(message + "请指定时间");
-                case 2 -> {
-                    long l = getData(args[1]);
-                    if (l == 0) {
-                        player.banPlayer(getReason("", l), sender.getName());// 永封{
-                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
-                    } else {
-                        player.banPlayer(getReason("", l), new Date(l), sender.getName());
-                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
-                    }
-                }
+                case 2 -> sender.sendMessage(message + "请指定封禁原因");
                 case 3 -> {
                     StringBuilder reason = new StringBuilder();
                     for (int i = 2; i < args.length; i++) {
                         reason.append(args[i]).append(" ");
                     }
                     long l = getData(args[1]);
+                    String sName = sender.getName();
+                    String sReason = String.valueOf(reason);
+                    String playerName = player.getName();
                     if (l == 0) {
-                        player.banPlayer(getReason(String.valueOf(reason), l), sender.getName());// 永封
-                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                        player.banPlayer(getReason(sReason, l), sName);// 永封
                     } else {
-                        player.banPlayer(getReason(String.valueOf(reason), l), new Date(l), sender.getName());
-                        sender.sendMessage(message + "封禁" + player.getName() + "成功");
+                        Date date = new Date(l);
+                        player.banPlayer(getReason(sReason, l), date, sName);
                     }
+                    sender.sendMessage(message + "封禁" + playerName + "成功");
+                    sentenceNotice(sender.getName(), playerName, sReason);
                 }
             }
         } catch (RuntimeException e) {
@@ -97,7 +93,7 @@ public class Ban implements TabExecutor {
         return list;
     }
 
-    public static String getReason(String text, Long time) {
+    private static String getReason(String text, Long time) {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         String textTime = (time == 0) ? "永封" : ft.format(time);
         if (Objects.equals(text, "")) {
@@ -105,7 +101,7 @@ public class Ban implements TabExecutor {
         } else return (prefix + "\n" + reason.replace("%reason%", text) + "\n" + suffix).replace("%time%", textTime);
     }
 
-    public static Long getData(String text) {
+    private static Long getData(String text) {
         // d:2022/8/16
         // l:1d
         if (text.startsWith("d:")) {
@@ -135,5 +131,14 @@ public class Ban implements TabExecutor {
             return (long) 0;
         }
         return (long) 0;
+    }
+
+    private static void sentenceNotice(String executor, String executed, String reason) {
+        if (snEnable) {
+            Bukkit.broadcast(Component.text(snText
+                    .replace("%executor%", executor)
+                    .replace("%executed%", executed)
+                    .replace("%reason%", reason)));
+        }
     }
 }
