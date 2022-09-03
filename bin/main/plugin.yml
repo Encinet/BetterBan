@@ -1,0 +1,12 @@
+name: BetterBan
+version: '${version}'
+main: org.encinet.betterban.BetterBan
+api-version: 1.19
+authors: [ ObcbO ]
+commands:
+  bb:
+    description: Ban player
+permissions:
+  bb.admin:
+    description: OnlyAdmin
+    default: op
