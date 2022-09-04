@@ -5,6 +5,7 @@ Sentence-notice:
     ----- &l&6Better&fBan -----
     &6处理者 &r&8>> &f%executor%
     &6封禁玩家 &r&8>> &f%executed%
+    &6解封日期 &r&8>> &f%time%
     &6原因 &r&8>> &f%reason%
 help:
   - "&f----- &6Better&fban &e帮助 &f-----"

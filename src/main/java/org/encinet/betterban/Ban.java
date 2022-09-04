@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import static org.encinet.betterban.Config.*;
 
@@ -45,18 +44,20 @@ public class Ban implements TabExecutor {
                     for (int i = 2; i < args.length; i++) {
                         reason.append(args[i]).append(" ");
                     }
-                    long l = getData(args[1]);
                     String sName = sender.getName();
                     String sReason = String.valueOf(reason);
                     String playerName = player.getName();
+
+                    long l = getData(args[1]);
+                    String dataText = getDataText(getData(args[1]));
                     if (l == 0) {
-                        player.banPlayer(getReason(sReason, l), sName);// 永封
+                        player.banPlayer(getReason(sReason, dataText), sName);// 永封
                     } else {
                         Date date = new Date(l);
-                        player.banPlayer(getReason(sReason, l), date, sName);
+                        player.banPlayer(getReason(sReason, dataText), date, sName);
                     }
                     sender.sendMessage(message + "封禁" + playerName + "成功");
-                    sentenceNotice(sender.getName(), playerName, sReason);
+                    sentenceNotice(sender.getName(), playerName, dataText, sReason);
                 }
             }
         } catch (RuntimeException e) {
@@ -102,13 +103,8 @@ public class Ban implements TabExecutor {
         return list;
     }
 
-    private static String getReason(String text, Long time) {
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        String textTime = (time == 0) ? "永封" : ft.format(time);
-        if (Objects.equals(text, "")) {
-            return (prefix + "\n" + suffix).replace("%time%", textTime);
-        } else
-            return (prefix + "\n" + reason.replace("%reason%", text) + "\n" + suffix).replace("%time%", textTime);
+    private static String getReason(String reason, String time) {
+        return (prefix + "\n" + reason.replace("%reason%", reason) + "\n" + suffix).replace("%time%", time);
     }
 
     private static Long getData(String text) {
@@ -143,11 +139,18 @@ public class Ban implements TabExecutor {
         return (long) 0;
     }
 
-    private static void sentenceNotice(String executor, String executed, String reason) {
+    private static String getDataText(Long time) {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return (time == 0) ? "永封" : ft.format(time);
+    }
+
+    // 公开处刑
+    private static void sentenceNotice(String executor, String executed, String time, String reason) {
         if (snEnable) {
             Bukkit.broadcast(Component.text(snText
                     .replace("%executor%", executor)
                     .replace("%executed%", executed)
+                    .replace("%time%", time)
                     .replace("%reason%", reason)));
         }
     }
