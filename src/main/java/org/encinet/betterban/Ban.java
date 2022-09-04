@@ -79,7 +79,7 @@ public class Ban implements TabExecutor {
                     if (length > name.length()) {
                         continue;// 长度超出跳过本次循环
                     }
-                    if (name.startsWith(now)) {
+                    if (name.toLowerCase().startsWith(now.toLowerCase())) {
                         list.add(name);
                     }
                 }
