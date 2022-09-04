@@ -104,7 +104,9 @@ public class Ban implements TabExecutor {
     }
 
     private static String getReason(String reason, String time) {
-        return (prefix + "\n" + reason.replace("%reason%", reason) + "\n" + suffix).replace("%time%", time);
+        return "\n" + banReason
+        .replace("%reason%", reason)
+        .replace("%time%", time);
     }
 
     private static Long getData(String text) {

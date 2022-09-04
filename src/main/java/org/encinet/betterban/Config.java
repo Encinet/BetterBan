@@ -17,18 +17,14 @@ public class Config {
     public static boolean snEnable;
     public static String snText;
     public static List<String> help;
-    public static String prefix;
-    public static String reason;
-    public static String suffix;
+    public static String banReason;
 
     public static void load() {
         message = get("message", " &l&6Better&fBan &r&8>> &r");
         snEnable = config.getBoolean("Sentence-notice.enable", true);
         snText = get("Sentence-notice.text");
         help = listCP("help");
-        prefix = get("prefix");
-        reason = get("reason");
-        suffix = get("suffix");
+        banReason = get("reason");
     }
 
     private static String get(String path, String def) {

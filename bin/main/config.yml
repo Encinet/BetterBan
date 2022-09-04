@@ -1,7 +1,7 @@
 message: " &l&6Better&fBan &r&8>> &r"
 Sentence-notice:
   enable: true
-  text: |
+  text: |-
     ----- &l&6Better&fBan -----
     &6处理者 &r&8>> &f%executor%
     &6封禁玩家 &r&8>> &f%executed%
@@ -17,14 +17,12 @@ help:
   - "&a例子&7: &a1s 1m 1h 1d"
   - "&6forever &e永封"
   - "&f----- &eBy &6ObcbO &f-----"
-prefix: |-
+reason: |-
   &6米&f客
   &7-------------------
   &c你已被服务器封禁
-reason: |-
   &e原因
   &e%reason%
-suffix: |-
   &c解封日期: %time%
   如有异议 在QQ群1138627074向管理员申诉
   &7-------------------
