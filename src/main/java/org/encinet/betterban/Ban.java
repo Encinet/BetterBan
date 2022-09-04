@@ -6,10 +6,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -64,8 +66,40 @@ public class Ban implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
-        return TabComplete.returnList(args, args.length, sender);
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+            String[] args) {
+        List<String> list = new ArrayList<>();
+        switch (args.length) {
+            case 1 -> {
+                for (Player n : Bukkit.getOnlinePlayers()) {
+                    String name = n.getName();
+                    String now = args[0];
+                    int length = now.length();
+                    if (length > name.length()) {
+                        continue;// 长度超出跳过本次循环
+                    }
+                    if (name.startsWith(now)) {
+                        list.add(name);
+                    }
+                }
+            }
+            case 2 -> {
+                if (args[1].startsWith("d")) {
+                    list.add("d:2000/1/1");
+                } else if (args[1].startsWith("l")) {
+                    list.add("l:1s");
+                    list.add("l:1m");
+                    list.add("l:1h");
+                    list.add("l:1d");
+                } else {
+                    list.add("d:2000/1/1");
+                    list.add("forever");
+                    list.add("l:1s");
+                }
+            }
+            case 3 -> list.add("[reason]");
+        }
+        return list;
     }
 
     private static String getReason(String text, Long time) {
@@ -73,7 +107,8 @@ public class Ban implements TabExecutor {
         String textTime = (time == 0) ? "永封" : ft.format(time);
         if (Objects.equals(text, "")) {
             return (prefix + "\n" + suffix).replace("%time%", textTime);
-        } else return (prefix + "\n" + reason.replace("%reason%", text) + "\n" + suffix).replace("%time%", textTime);
+        } else
+            return (prefix + "\n" + reason.replace("%reason%", text) + "\n" + suffix).replace("%time%", textTime);
     }
 
     private static Long getData(String text) {
