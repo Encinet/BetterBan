@@ -23,7 +23,7 @@ public class Ban implements TabExecutor {
         if (!sender.hasPermission("bb.admin")) {
             sender.sendMessage(message + "§c没有权限");
             return true;
-        } else if (args.length < 1 || "help".equals(args[0])) {
+        } else if (args.length == 0 || "help".equals(args[0])) {
             for (String now : help) {
                 sender.sendMessage(now);
             }
@@ -39,7 +39,7 @@ public class Ban implements TabExecutor {
             switch (args.length) {
                 case 1 -> sender.sendMessage(message + "请指定时间");
                 case 2 -> sender.sendMessage(message + "请指定封禁原因");
-                case 3 -> {
+                default -> {
                     StringBuilder reason = new StringBuilder();
                     for (int i = 2; i < args.length; i++) {
                         reason.append(args[i]).append(" ");
