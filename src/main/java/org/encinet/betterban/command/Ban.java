@@ -21,7 +21,7 @@ public class Ban implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!sender.hasPermission("bb.admin")) {
-            sender.sendMessage(message + "§c没有权限");
+            sender.sendMessage(prefix + "§c没有权限");
             return true;
         } else if (args.length == 0 || "help".equals(args[0])) {
             for (String now : help) {
@@ -32,16 +32,16 @@ public class Ban implements TabExecutor {
         // /bb <ID> <time> [reason]
         OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
         if (player.isBanned()) {
-            sender.sendMessage(message + "此玩家已处于封禁状态");
+            sender.sendMessage(prefix + "此玩家已处于封禁状态");
             return true;
         } else if (!player.hasPlayedBefore()) {
-            sender.sendMessage(message + "此玩家未进入过服务器");
+            sender.sendMessage(prefix + "此玩家未进入过服务器");
             return true;
         }
         try {
             switch (args.length) {
-                case 1 -> sender.sendMessage(message + "请指定时间");
-                case 2 -> sender.sendMessage(message + "请指定封禁原因");
+                case 1 -> sender.sendMessage(prefix + "请指定时间");
+                case 2 -> sender.sendMessage(prefix + "请指定封禁原因");
                 default -> {
                     StringBuilder reason = new StringBuilder();
                     for (int i = 2; i < args.length; i++) {
@@ -59,12 +59,12 @@ public class Ban implements TabExecutor {
                         Date date = new Date(l);
                         player.banPlayer(getReason(sReason, dataText), date, sName);
                     }
-                    sender.sendMessage(message + "封禁" + playerName + "成功");
+                    sender.sendMessage(prefix + "封禁" + playerName + "成功");
                     sentenceNotice(sender.getName(), playerName, dataText, sReason);
                 }
             }
         } catch (RuntimeException e) {
-            sender.sendMessage(message + "出错了呢qwq");
+            sender.sendMessage(prefix + "出错了呢qwq");
         }
         return true;
     }
