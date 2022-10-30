@@ -1,14 +1,10 @@
 package org.encinet.betterban.command;
 
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
-import org.bukkit.entity.Player;
-import org.encinet.betterban.until.BanData;
-import org.jetbrains.annotations.NotNull;
+import static org.encinet.betterban.Config.banReason;
+import static org.encinet.betterban.Config.help;
+import static org.encinet.betterban.Config.prefix;
+import static org.encinet.betterban.Config.snEnable;
+import static org.encinet.betterban.Config.snText;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,7 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.encinet.betterban.Config.*;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Player;
+import org.encinet.betterban.until.BanData;
+import org.jetbrains.annotations.NotNull;
+
+import net.kyori.adventure.text.Component;
 
 public class Ban implements TabExecutor {
     private static final Map<CommandSender, BanData> confirm = new ConcurrentHashMap<>();
@@ -35,7 +40,8 @@ public class Ban implements TabExecutor {
             return true;
         } else if (args[0].equals("--confirm")) {
             if (confirm.containsKey(sender)) {
-                confirm.get(sender).ban(sender.getName());
+                BanData data = confirm.get(sender);
+                execute(sender, data.player(), data.reason(), data.ms());
                 confirm.remove(sender);
             } else {
                 sender.sendMessage(prefix + "暂无需确认的封禁");
@@ -54,26 +60,16 @@ public class Ban implements TabExecutor {
                 case 1 -> sender.sendMessage(prefix + "请指定时间");
                 case 2 -> sender.sendMessage(prefix + "请指定封禁原因");
                 default -> {
-                    StringBuilder reason = new StringBuilder();
+                    StringBuilder reasonSB = new StringBuilder();
                     for (int i = 2; i < args.length; i++) {
-                        reason.append(args[i]).append(" ");
+                        reasonSB.append(args[i]).append(" ");
                     }
-                    String sName = sender.getName();
-                    String playerName = player.getName();
+                    String reason = String.valueOf(reasonSB);
                     long l = getData(args[1]);
-                    String dataText = getDataText(getData(args[1]));
-                    String sReason = getReason(String.valueOf(reason), dataText);
                     if (player.hasPlayedBefore()) {
-                        if (l == 0) {
-                            player.banPlayer(sReason, sName);// 永封
-                        } else {
-                            Date date = new Date(l);
-                            player.banPlayer(sReason, date, sName);
-                        }
-                        sender.sendMessage(prefix + "封禁" + playerName + "成功");
-                        sentenceNotice(sender.getName(), playerName, dataText, String.valueOf(reason));
+                        execute(sender, player, reason, l);
                     } else {
-                        confirm.put(sender, new BanData(player, l, sReason));
+                        confirm.put(sender, new BanData(player, l, reason));
                         sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb --confirm确认");
                     }
                 }
@@ -177,5 +173,21 @@ public class Ban implements TabExecutor {
                     .replace("%time%", time)
                     .replace("%reason%", reason)));
         }
+    }
+
+    public void execute(CommandSender sender, OfflinePlayer player, String reason, Long ms) {
+        String senderName = sender.getName();
+        String playerName = player.getName();
+        String dataText = getDataText(ms);
+        String formatReason = getReason(reason, dataText);
+
+        if (ms == 0) {
+            player.banPlayer(formatReason, senderName);// 永封
+        } else {
+            Date date = new Date(ms);
+            player.banPlayer(formatReason, date, senderName);
+        }
+        sender.sendMessage(prefix + "封禁" + playerName + "成功");
+        sentenceNotice(sender.getName(), playerName, dataText, reason);
     }
 }
