@@ -34,6 +34,7 @@ public class Ban implements TabExecutor {
         if (player.isBanned()) {
             sender.sendMessage(message + "此玩家已处于封禁状态");
             return true;
+        } else if (player.) {
         }
         try {
             switch (args.length) {
