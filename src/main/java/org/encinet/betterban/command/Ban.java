@@ -38,6 +38,7 @@ public class Ban implements TabExecutor {
                 sender.sendMessage(prefix + "暂无需确认的封禁");
             } else {
                 confirm.get(sender).ban(sender.getName());
+                confirm.remove(sender);
             }
             return true;
         }
