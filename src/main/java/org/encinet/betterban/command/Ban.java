@@ -1,4 +1,4 @@
-package org.encinet.betterban;
+package org.encinet.betterban.command;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -34,7 +34,9 @@ public class Ban implements TabExecutor {
         if (player.isBanned()) {
             sender.sendMessage(message + "此玩家已处于封禁状态");
             return true;
-        } else if (player.) {
+        } else if (!player.hasPlayedBefore()) {
+            sender.sendMessage(message + "此玩家未进入过服务器");
+            return true;
         }
         try {
             switch (args.length) {
