@@ -7,6 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.encinet.betterban.until.BanData;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
@@ -49,19 +50,19 @@ public class Ban implements TabExecutor {
                     long l = getData(args[1]);
                     String dataText = getDataText(getData(args[1]));
                     String sReason = getReason(String.valueOf(reason), dataText);
-if (player.hasPlayedBefore()) {
-                    if (l == 0) {
-                        player.banPlayer(sReason, sName);// 永封
+                    if (player.hasPlayedBefore()) {
+                        if (l == 0) {
+                            player.banPlayer(sReason, sName);// 永封
+                        } else {
+                            Date date = new Date(l);
+                            player.banPlayer(sReason, date, sName);
+                        }
+                        sender.sendMessage(prefix + "封禁" + playerName + "成功");
+                        sentenceNotice(sender.getName(), playerName, dataText, sReason);
                     } else {
-                        Date date = new Date(l);
-                        player.banPlayer(sReason, date, sName);
+                        Confirm.list.put(sender, new BanData(player, l, sReason));
+                        sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb confirm确认");
                     }
-                    sender.sendMessage(prefix + "封禁" + playerName + "成功");
-                    sentenceNotice(sender.getName(), playerName, dataText, sReason);
-        } else {
-Confirm.list.put(sender, new Confiem.BanData(player, date, sReason));
-sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb confirm确认");
-}
                 }
             }
         } catch (RuntimeException e) {
@@ -74,47 +75,47 @@ sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb conf
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
             String[] args) {
         if (sender.hasPermission("bb.admin")) {
-        List<String> list = new ArrayList<>();
-        switch (args.length) {
-            case 1 -> {
-                for (Player n : Bukkit.getOnlinePlayers()) {
-                    String name = n.getName();
-                    String now = args[0];
-                    int length = now.length();
-                    if (length > name.length()) {
-                        continue;// 长度超出跳过本次循环
-                    }
-                    if (name.toLowerCase().startsWith(now.toLowerCase())) {
-                        list.add(name);
+            List<String> list = new ArrayList<>();
+            switch (args.length) {
+                case 1 -> {
+                    for (Player n : Bukkit.getOnlinePlayers()) {
+                        String name = n.getName();
+                        String now = args[0];
+                        int length = now.length();
+                        if (length > name.length()) {
+                            continue;// 长度超出跳过本次循环
+                        }
+                        if (name.toLowerCase().startsWith(now.toLowerCase())) {
+                            list.add(name);
+                        }
                     }
                 }
-            }
-            case 2 -> {
-                if (args[1].startsWith("d")) {
-                    list.add("d:2000/1/1");
-                } else if (args[1].startsWith("l")) {
-                    list.add("l:1s");
-                    list.add("l:1m");
-                    list.add("l:1h");
-                    list.add("l:1d");
-                } else {
-                    list.add("d:2000/1/1");
-                    list.add("forever");
-                    list.add("l:1s");
+                case 2 -> {
+                    if (args[1].startsWith("d")) {
+                        list.add("d:2000/1/1");
+                    } else if (args[1].startsWith("l")) {
+                        list.add("l:1s");
+                        list.add("l:1m");
+                        list.add("l:1h");
+                        list.add("l:1d");
+                    } else {
+                        list.add("d:2000/1/1");
+                        list.add("forever");
+                        list.add("l:1s");
+                    }
                 }
+                case 3 -> list.add("[reason]");
             }
-            case 3 -> list.add("[reason]");
+            return list;
+        } else {
+            return null;
         }
-        return list;
-} else {
-return null;
-}
     }
 
     private static String getReason(String reason, String time) {
         return "\n" + banReason
-        .replace("%reason%", reason)
-        .replace("%time%", time);
+                .replace("%reason%", reason)
+                .replace("%time%", time);
     }
 
     private static Long getData(String text) {
@@ -155,7 +156,7 @@ return null;
     }
 
     // 公开处刑
-    private static void sentenceNotice(String executor, String executed, String time, String reason) {
+    public static void sentenceNotice(String executor, String executed, String time, String reason) {
         if (snEnable) {
             Bukkit.broadcast(Component.text(snText
                     .replace("%executor%", executor)

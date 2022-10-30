@@ -6,6 +6,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Objects;
 import java.util.logging.Logger;
 
+import org.encinet.betterban.command.*;
+
 public final class BetterBan extends JavaPlugin {
     public static final Logger logger = Logger.getLogger("BetterBan");
 

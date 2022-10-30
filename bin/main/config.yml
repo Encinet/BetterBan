@@ -1,4 +1,4 @@
-message: " &l&6Better&fBan &r&8>> &r"
+prefix: " &l&6Better&fBan &r&8>> &r"
 Sentence-notice:
   enable: true
   text: |-
