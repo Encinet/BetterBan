@@ -34,9 +34,6 @@ public class Ban implements TabExecutor {
         if (player.isBanned()) {
             sender.sendMessage(prefix + "此玩家已处于封禁状态");
             return true;
-        } else if (!player.hasPlayedBefore()) {
-            sender.sendMessage(prefix + "此玩家未进入过服务器");
-            return true;
         }
         try {
             switch (args.length) {
@@ -48,19 +45,23 @@ public class Ban implements TabExecutor {
                         reason.append(args[i]).append(" ");
                     }
                     String sName = sender.getName();
-                    String sReason = String.valueOf(reason);
                     String playerName = player.getName();
-
                     long l = getData(args[1]);
                     String dataText = getDataText(getData(args[1]));
+                    String sReason = getReason(String.valueOf(reason), dataText);
+if (player.hasPlayedBefore()) {
                     if (l == 0) {
-                        player.banPlayer(getReason(sReason, dataText), sName);// 永封
+                        player.banPlayer(sReason, sName);// 永封
                     } else {
                         Date date = new Date(l);
-                        player.banPlayer(getReason(sReason, dataText), date, sName);
+                        player.banPlayer(sReason, date, sName);
                     }
                     sender.sendMessage(prefix + "封禁" + playerName + "成功");
                     sentenceNotice(sender.getName(), playerName, dataText, sReason);
+        } else {
+Confirm.list.put(sender, new Confiem.BanData(player, date, sReason));
+sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb confirm确认");
+}
                 }
             }
         } catch (RuntimeException e) {
