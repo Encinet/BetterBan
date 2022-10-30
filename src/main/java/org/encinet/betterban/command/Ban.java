@@ -71,10 +71,10 @@ public class Ban implements TabExecutor {
                             player.banPlayer(sReason, date, sName);
                         }
                         sender.sendMessage(prefix + "封禁" + playerName + "成功");
-                        sentenceNotice(sender.getName(), playerName, dataText, sReason);
+                        sentenceNotice(sender.getName(), playerName, dataText, String.valueOf(reason));
                     } else {
                         confirm.put(sender, new BanData(player, l, sReason));
-                        sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb confirm确认");
+                        sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb --confirm确认");
                     }
                 }
             }
