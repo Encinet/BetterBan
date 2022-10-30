@@ -35,10 +35,10 @@ public class Ban implements TabExecutor {
             return true;
         } else if (args[0].equals("--confirm")) {
             if (confirm.containsKey(sender)) {
-                sender.sendMessage(prefix + "暂无需确认的封禁");
-            } else {
                 confirm.get(sender).ban(sender.getName());
                 confirm.remove(sender);
+            } else {
+                sender.sendMessage(prefix + "暂无需确认的封禁");
             }
             return true;
         }
