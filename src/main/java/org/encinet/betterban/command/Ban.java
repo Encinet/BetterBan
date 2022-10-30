@@ -72,6 +72,7 @@ public class Ban implements TabExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
             String[] args) {
+        if (sender.hasPermission("bb.admin")) {
         List<String> list = new ArrayList<>();
         switch (args.length) {
             case 1 -> {
@@ -104,6 +105,9 @@ public class Ban implements TabExecutor {
             case 3 -> list.add("[reason]");
         }
         return list;
+} else {
+return null;
+}
     }
 
     private static String getReason(String reason, String time) {
