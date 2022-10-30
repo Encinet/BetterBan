@@ -13,14 +13,14 @@ import java.util.Objects;
 public class Config {
     private static final FileConfiguration config = YamlConfiguration.loadConfiguration(
             new File(JavaPlugin.getProvidingPlugin(BetterBan.class).getDataFolder(), "config.yml"));
-    public static String message;
+    public static String prefix;
     public static boolean snEnable;
     public static String snText;
     public static List<String> help;
     public static String banReason;
 
     public static void load() {
-        message = get("message", " &l&6Better&fBan &r&8>> &r");
+        prefix = get("prefix", " &l&6Better&fBan &r&8>> &r");
         snEnable = config.getBoolean("Sentence-notice.enable", true);
         snText = get("Sentence-notice.text");
         help = listCP("help");
