@@ -15,21 +15,33 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.encinet.betterban.Config.*;
 
 public class Ban implements TabExecutor {
+    private static final Map<CommandSender, BanData> confirm = new ConcurrentHashMap<>();
+
     @Override
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (!sender.hasPermission("bb.admin")) {
             sender.sendMessage(prefix + "§c没有权限");
             return true;
-        } else if (args.length == 0 || "help".equals(args[0])) {
+        } else if (args.length == 0) {
             for (String now : help) {
                 sender.sendMessage(now);
             }
             return true;
+        } else if (args[0].equals("--confirm")) {
+            if (confirm.containsKey(sender)) {
+                sender.sendMessage(prefix + "暂无需确认的封禁");
+            } else {
+                confirm.get(sender).ban(sender.getName());
+            }
+            return true;
         }
+
         // /bb <ID> <time> [reason]
         OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
         if (player.isBanned()) {
@@ -60,7 +72,7 @@ public class Ban implements TabExecutor {
                         sender.sendMessage(prefix + "封禁" + playerName + "成功");
                         sentenceNotice(sender.getName(), playerName, dataText, sReason);
                     } else {
-                        Confirm.list.put(sender, new BanData(player, l, sReason));
+                        confirm.put(sender, new BanData(player, l, sReason));
                         sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb confirm确认");
                     }
                 }
