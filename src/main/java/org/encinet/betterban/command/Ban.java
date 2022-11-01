@@ -118,10 +118,9 @@ public class Ban implements TabExecutor {
                                 }
                             }
                         } else {
-                            list.add("l:1s");
-                            list.add("l:1m");
-                            list.add("l:1h");
-                            list.add("l:1d");
+                            for (String n : timeUnit) {
+                                list.add("l:1" + n);
+                            }
                         }
                     } else {
                         list.add("d:2000/1/1");
