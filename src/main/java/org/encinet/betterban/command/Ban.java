@@ -21,12 +21,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.encinet.betterban.until.BanData;
+import org.encinet.betterban.until.Tool;
 import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
 
 public class Ban implements TabExecutor {
     private static final Map<CommandSender, BanData> confirm = new ConcurrentHashMap<>();
+    private static final String[] timeUnit = { "s", "m", "h", "d" };
 
     @Override
     public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
@@ -103,10 +105,24 @@ public class Ban implements TabExecutor {
                     if (args[1].startsWith("d")) {
                         list.add("d:2000/1/1");
                     } else if (args[1].startsWith("l")) {
-                        list.add("l:1s");
-                        list.add("l:1m");
-                        list.add("l:1h");
-                        list.add("l:1d");
+                        if (args[1].startsWith("l:") && args[1].length() > 2) {
+                            String sub = args[1].substring(2);
+                            String subNoLast = sub.substring(0, sub.length() - 1);
+                            if (Tool.isNum(sub)) {
+                                for (String n : timeUnit) {
+                                    list.add("l:" + sub + n);
+                                }
+                            } else if (Tool.isNum(subNoLast)) {
+                                for (String n : timeUnit) {
+                                    list.add("l:" + subNoLast + n);
+                                }
+                            }
+                        } else {
+                            list.add("l:1s");
+                            list.add("l:1m");
+                            list.add("l:1h");
+                            list.add("l:1d");
+                        }
                     } else {
                         list.add("d:2000/1/1");
                         list.add("forever");
