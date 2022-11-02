@@ -9,6 +9,7 @@ import static org.encinet.betterban.Config.snText;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,15 +108,13 @@ public class Ban implements TabExecutor {
                     } else if (args[1].startsWith("l")) {
                         if (args[1].startsWith("l:") && args[1].length() > 2) {
                             String sub = args[1].substring(2);
-                            String subNoLast = sub.substring(0, sub.length() - 1);
+                            String subLast = sub.substring(sub.length() - 1);
                             if (Tool.isNum(sub)) {
                                 for (String n : timeUnit) {
                                     list.add("l:" + sub + n);
                                 }
-                            } else if (Tool.isNum(subNoLast)) {
-                                for (String n : timeUnit) {
-                                    list.add("l:" + subNoLast + n);
-                                }
+                            } else if (Arrays.asList(timeUnit).contains(subLast)) {
+                                list.add(args[1]);
                             }
                         } else {
                             for (String n : timeUnit) {
