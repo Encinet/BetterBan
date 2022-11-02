@@ -4,7 +4,8 @@ main: org.encinet.betterban.BetterBan
 api-version: 1.19
 authors: [ ObcbO ]
 commands:
-  ban:
+  bb:
+    aliases: ban
     description: Ban player
 permissions:
   bb.admin:

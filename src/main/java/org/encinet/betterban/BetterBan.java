@@ -18,7 +18,7 @@ public final class BetterBan extends JavaPlugin {
         saveDefaultConfig();
         Config.load();
 
-        Objects.requireNonNull(Bukkit.getPluginCommand("ban")).setExecutor(new Ban());
+        Objects.requireNonNull(Bukkit.getPluginCommand("bb")).setExecutor(new Ban());
 
         logger.info("COMMAND > Registered");
     }
