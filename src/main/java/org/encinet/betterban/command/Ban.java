@@ -108,12 +108,12 @@ public class Ban implements TabExecutor {
                     } else if (args[1].startsWith("l")) {
                         if (args[1].startsWith("l:") && args[1].length() > 2) {
                             String sub = args[1].substring(2);
-                            String subLast = sub.substring(sub.length() - 1);
+                            int subLength = sub.length();
                             if (Tool.isNum(sub)) {
                                 for (String n : timeUnit) {
                                     list.add("l:" + sub + n);
                                 }
-                            } else if (Arrays.asList(timeUnit).contains(subLast)) {
+                            } else if (Arrays.asList(timeUnit).contains(sub.substring(subLength - 1)) && Tool.isNum(sub.substring(0, subLength - 1))) {
                                 list.add(args[1]);
                             }
                         } else {
