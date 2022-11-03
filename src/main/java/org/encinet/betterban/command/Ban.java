@@ -6,8 +6,6 @@ import static org.encinet.betterban.Config.prefix;
 import static org.encinet.betterban.Config.snEnable;
 import static org.encinet.betterban.Config.snText;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -22,6 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.encinet.betterban.until.BanData;
+import org.encinet.betterban.until.DateProcess;
 import org.encinet.betterban.until.Tool;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,7 +67,7 @@ public class Ban implements TabExecutor {
                         reasonSB.append(args[i]).append(" ");
                     }
                     String reason = String.valueOf(reasonSB);
-                    long l = getData(args[1]);
+                    long l = DateProcess.getData(args[1]);
                     if (player.hasPlayedBefore()) {
                         execute(sender, player, reason, l);
                     } else {
@@ -103,8 +102,9 @@ public class Ban implements TabExecutor {
                     }
                 }
                 case 2 -> {
+                    String d = "d:" + DateProcess.getNowTime();
                     if (args[1].startsWith("d")) {
-                        list.add("d:2000/1/1");
+                        list.add(d);
                     } else if (args[1].startsWith("l")) {
                         if (args[1].startsWith("l:") && args[1].length() > 2) {
                             String sub = args[1].substring(2);
@@ -122,7 +122,7 @@ public class Ban implements TabExecutor {
                             }
                         }
                     } else {
-                        list.add("d:2000/1/1");
+                        list.add(d);
                         list.add("forever");
                         list.add("l:1s");
                     }
@@ -141,43 +141,6 @@ public class Ban implements TabExecutor {
                 .replace("%time%", time);
     }
 
-    private static Long getData(String text) {
-        // d:2022/8/16
-        // l:1d
-        if (text.startsWith("d:")) {
-            text = text.substring(2);
-            SimpleDateFormat ft = new SimpleDateFormat("yyyy/MM/dd");
-            Date date;
-            try {
-                date = ft.parse(text);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            return date.getTime();
-        } else if (text.startsWith("l:")) {
-            // s秒 m分 h小时 d天
-            long l = Long.parseLong(text.substring(2, text.length() - 1));
-            switch (text.substring(text.length() - 1)) {
-                case "s":
-                    return System.currentTimeMillis() + (l * 1000);
-                case "m":
-                    return System.currentTimeMillis() + (l * 60000);
-                case "h":
-                    return System.currentTimeMillis() + (l * 3600000);
-                case "d":
-                    return System.currentTimeMillis() + (l * 86400000);
-            }
-        } else if ("forever".equals(text)) {
-            return (long) 0;
-        }
-        return (long) 0;
-    }
-
-    private static String getDataText(Long time) {
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        return (time == 0) ? "永封" : ft.format(time);
-    }
-
     // 公开处刑
     public static void sentenceNotice(String executor, String executed, String time, String reason) {
         if (snEnable) {
@@ -192,7 +155,7 @@ public class Ban implements TabExecutor {
     public void execute(CommandSender sender, OfflinePlayer player, String reason, Long ms) {
         String senderName = sender.getName();
         String playerName = player.getName();
-        String dataText = getDataText(ms);
+        String dataText = DateProcess.getDataText(ms);
         String formatReason = getReason(reason, dataText);
 
         if (ms == 0) {
