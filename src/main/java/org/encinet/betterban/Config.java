@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Config {
-    private static final FileConfiguration config = YamlConfiguration.loadConfiguration(
-            new File(JavaPlugin.getProvidingPlugin(BetterBan.class).getDataFolder(), "config.yml"));
+    private static final FileConfiguration config = YamlConfiguration.loadConfiguration(new File(JavaPlugin.getProvidingPlugin(BetterBan.class).getDataFolder(), "config.yml"));
     public static String prefix;
     public static boolean snEnable;
     public static String snText;
@@ -30,6 +29,7 @@ public class Config {
     private static String get(String path, String def) {
         return ChatColor.translateAlternateColorCodes('&', config.getString(path, def));
     }
+
     private static String get(String path) {
         return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString(path)));
     }

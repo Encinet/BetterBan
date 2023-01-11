@@ -1,18 +1,6 @@
 package org.encinet.betterban.command;
 
-import static org.encinet.betterban.Config.banReason;
-import static org.encinet.betterban.Config.help;
-import static org.encinet.betterban.Config.prefix;
-import static org.encinet.betterban.Config.snEnable;
-import static org.encinet.betterban.Config.snText;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -24,7 +12,10 @@ import org.encinet.betterban.until.DateProcess;
 import org.encinet.betterban.until.Tool;
 import org.jetbrains.annotations.NotNull;
 
-import net.kyori.adventure.text.Component;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.encinet.betterban.Config.*;
 
 public class Ban implements TabExecutor {
     private static final Map<CommandSender, BanData> confirm = new ConcurrentHashMap<>();

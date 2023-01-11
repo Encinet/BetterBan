@@ -8,7 +8,7 @@ public class DateProcess {
     private static SimpleDateFormat ft = new SimpleDateFormat("yyyy/MM/dd");
 
     /**
-     * @param 文本 l:2000/1/1 d:1s
+     * @param text l:2000/1/1 d:1s
      * @return 封禁结束的毫秒数
      */
     public static Long getData(String text) {
@@ -43,7 +43,7 @@ public class DateProcess {
     }
 
     /**
-     * @param 毫秒数
+     * @param time 毫秒数
      * @return 时间可读文本
      */
     public static String getDataText(Long time) {
