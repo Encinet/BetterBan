@@ -1,161 +1,217 @@
 package org.encinet.betterban.command;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
+import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import org.encinet.betterban.until.BanData;
-import org.encinet.betterban.until.DateProcess;
-import org.encinet.betterban.until.Tool;
-import org.jetbrains.annotations.NotNull;
+import org.encinet.betterban.BetterBan;
+import org.encinet.betterban.Config;
+import org.encinet.betterban.util.DateProcess;
+import org.encinet.betterban.util.Tool;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Instant;
+import java.util.List;
 
-import static org.encinet.betterban.Config.*;
+public class Ban {
+    private static final List<String> TIME_UNITS = List.of("s", "m", "h", "d");
 
-public class Ban implements TabExecutor {
-    private static final Map<CommandSender, BanData> confirm = new ConcurrentHashMap<>();
-    private static final String[] timeUnit = { "s", "m", "h", "d" };
+    public static LiteralCommandNode<CommandSourceStack> create() {
+        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("ban")
+                .requires(source -> source.getSender().hasPermission("bb.admin"))
+                .executes(ctx -> {
+                    sendHelp(ctx.getSource().getSender());
+                    return Command.SINGLE_SUCCESS;
+                });
 
-    @Override
-    public boolean onCommand(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!sender.hasPermission("bb.admin")) {
-            sender.sendMessage(prefix + "§c没有权限");
-            return true;
-        } else if (args.length == 0) {
-            for (String now : help) {
-                sender.sendMessage(now);
-            }
-            return true;
-        } else if (args[0].equals("--confirm")) {
-            if (confirm.containsKey(sender)) {
-                BanData data = confirm.get(sender);
-                execute(sender, data.player(), data.reason(), data.ms());
-                confirm.remove(sender);
-            } else {
-                sender.sendMessage(prefix + "暂无需确认的封禁");
-            }
-            return true;
-        }
+        // /ban <player> <args>
+        command.then(Commands.argument("player", ArgumentTypes.player())
+                .suggests(playerSuggestions())
+                .then(Commands.argument("args", StringArgumentType.greedyString())
+                        .suggests(timeSuggestions())
+                        .executes(Ban::executeBan)));
 
-        // /bb <ID> <time> [reason]
-        OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
-        if (player.isBanned()) {
-            sender.sendMessage(prefix + "此玩家已处于封禁状态");
-            return true;
-        }
+        return command.build();
+    }
+
+    private static int executeBan(CommandContext<CommandSourceStack> ctx) {
+        CommandSender sender = ctx.getSource().getSender();
+
         try {
-            switch (args.length) {
-                case 1 -> sender.sendMessage(prefix + "请指定时间");
-                case 2 -> sender.sendMessage(prefix + "请指定封禁原因");
-                default -> {
-                    StringBuilder reasonSB = new StringBuilder();
-                    for (int i = 2; i < args.length; i++) {
-                        reasonSB.append(args[i]).append(" ");
-                    }
-                    String reason = String.valueOf(reasonSB);
-                    long l = DateProcess.getData(args[1]);
-                    if (player.hasPlayedBefore()) {
-                        execute(sender, player, reason, l);
-                    } else {
-                        confirm.put(sender, new BanData(player, l, reason));
-                        sender.sendMessage(prefix + "此玩家尚未进服 如需封禁请输入/bb --confirm确认");
-                    }
-                }
+            PlayerSelectorArgumentResolver resolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
+            Player targetPlayer = resolver.resolve(ctx.getSource()).getFirst();
+            OfflinePlayer player = Bukkit.getOfflinePlayer(targetPlayer.getUniqueId());
+
+            if (player.isBanned()) {
+                sender.sendMessage(Config.prefix.append(
+                        Config.deserializeWithPlaceholders("<red>此玩家已处于封禁状态</red>")
+                ));
+                return 0;
             }
-        } catch (RuntimeException e) {
-            sender.sendMessage(prefix + "出错了呢qwq");
-        }
-        return true;
-    }
 
-    @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
-            String[] args) {
-        if (sender.hasPermission("bb.admin")) {
-            List<String> list = new ArrayList<>();
-            switch (args.length) {
-                case 1 -> {
-                    for (Player n : Bukkit.getOnlinePlayers()) {
-                        String name = n.getName();
-                        String now = args[0];
-                        int length = now.length();
-                        if (length > name.length()) {
-                            continue;// 长度超出跳过本次循环
-                        }
-                        if (name.toLowerCase().startsWith(now.toLowerCase())) {
-                            list.add(name);
-                        }
-                    }
-                }
-                case 2 -> {
-                    String d = "d:" + DateProcess.getNowTime();
-                    if (args[1].startsWith("d")) {
-                        list.add(d);
-                    } else if (args[1].startsWith("l")) {
-                        if (args[1].startsWith("l:") && args[1].length() > 2) {
-                            String sub = args[1].substring(2);
-                            int subLength = sub.length();
-                            if (Tool.isNum(sub)) {
-                                for (String n : timeUnit) {
-                                    list.add("l:" + sub + n);
-                                }
-                            } else if (Arrays.asList(timeUnit).contains(sub.substring(subLength - 1)) && Tool.isNum(sub.substring(0, subLength - 1))) {
-                                list.add(args[1]);
-                            }
-                        } else {
-                            for (String n : timeUnit) {
-                                list.add("l:1" + n);
-                            }
-                        }
-                    } else {
-                        list.add(d);
-                        list.add("forever");
-                        list.add("l:1s");
-                    }
-                }
-                case 3 -> list.add("[reason]");
+            // 手动解析 args: <time> <reason>
+            String args = ctx.getArgument("args", String.class);
+            int firstSpace = args.indexOf(' ');
+
+            if (firstSpace == -1) {
+                sender.sendMessage(Config.prefix.append(
+                        Config.deserializeWithPlaceholders("<red>请提供封禁原因</red>")
+                ));
+                return 0;
             }
-            return list;
-        } else {
-            return null;
+
+            String timeStr = args.substring(0, firstSpace);
+            String reason = args.substring(firstSpace + 1);
+
+            // 检查是否封禁自己
+            if (sender instanceof Player && ((Player) sender).getUniqueId().equals(player.getUniqueId())) {
+                sender.sendMessage(Config.prefix.append(
+                        Config.deserializeWithPlaceholders("<red>你不能封禁自己</red>")
+                ));
+                return 0;
+            }
+
+            // 检查 reason 中是否包含 --confirm
+            boolean confirmed = false;
+            if (reason.contains("--confirm")) {
+                confirmed = true;
+                // 移除 --confirm 并清理多余空格
+                reason = reason.replace("--confirm", "").trim().replaceAll("\\s+", " ");
+            }
+
+            long ms = DateProcess.getData(timeStr);
+
+            // 检查 d: 格式的日期是否已过期
+            if (timeStr.startsWith("d:") && ms != 0 && ms < System.currentTimeMillis()) {
+                sender.sendMessage(Config.prefix.append(
+                        Config.deserializeWithPlaceholders("<red>封禁日期不能是过去的时间</red>")
+                ));
+                return 0;
+            }
+
+            if (player.hasPlayedBefore()) {
+                executeBan(sender, player, reason, ms);
+            } else if (confirmed) {
+                executeBan(sender, player, reason, ms);
+            } else {
+                sender.sendMessage(Config.prefix.append(
+                        Config.deserializeWithPlaceholders("<yellow>此玩家尚未进服，如需封禁请在原因中添加 <white>--confirm</white></yellow>")
+                ));
+                return 0;
+            }
+            return Command.SINGLE_SUCCESS;
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage(Config.prefix.append(
+                    Config.deserializeWithPlaceholders("<red>" + e.getMessage() + "</red>")
+            ));
+            return 0;
+        } catch (Exception e) {
+            sender.sendMessage(Config.prefix.append(
+                    Config.deserializeWithPlaceholders("<red>执行封禁时发生错误，请检查命令格式</red>")
+            ));
+            BetterBan.logger.warning("封禁命令执行失败: " + e.getMessage());
+            return 0;
         }
     }
 
-    private static String getReason(String reason, String time) {
-        return "\n" + banReason
-                .replace("%reason%", reason)
-                .replace("%time%", time);
+    private static SuggestionProvider<CommandSourceStack> playerSuggestions() {
+        return (_, builder) -> {
+            String input = builder.getRemaining().toLowerCase();
+            Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(name -> name.toLowerCase().startsWith(input))
+                    .forEach(builder::suggest);
+            return builder.buildFuture();
+        };
     }
 
-    // 公开处刑
+    private static SuggestionProvider<CommandSourceStack> timeSuggestions() {
+        return (_, builder) -> {
+            String input = builder.getRemaining();
+            String currentDate = "d:" + DateProcess.getNowTime();
+
+            if (input.isEmpty()) {
+                builder.suggest(currentDate);
+                builder.suggest("forever");
+                builder.suggest("l:1s");
+            } else if (input.startsWith("d")) {
+                builder.suggest(currentDate);
+            } else if (input.startsWith("l:") && input.length() > 2) {
+                suggestDurationFormats(builder, input);
+            } else if (input.startsWith("l")) {
+                TIME_UNITS.forEach(unit -> builder.suggest("l:1" + unit));
+            } else {
+                builder.suggest(currentDate);
+                builder.suggest("forever");
+                builder.suggest("l:1s");
+            }
+            return builder.buildFuture();
+        };
+    }
+
+    private static void suggestDurationFormats(com.mojang.brigadier.suggestion.SuggestionsBuilder builder, String input) {
+        String sub = input.substring(2);
+        int subLength = sub.length();
+
+        if (Tool.isNum(sub)) {
+            // 纯数字，建议添加单位
+            TIME_UNITS.forEach(unit -> builder.suggest("l:" + sub + unit));
+        } else if (subLength > 0) {
+            // 检查是否已有单位
+            String lastChar = sub.substring(subLength - 1);
+            String numPart = sub.substring(0, subLength - 1);
+            if (TIME_UNITS.contains(lastChar) && Tool.isNum(numPart)) {
+                builder.suggest(input);
+            }
+        }
+    }
+
+    private static void sendHelp(CommandSender sender) {
+        Config.help.forEach(sender::sendMessage);
+    }
+
+    /**
+     * 公开处刑通知
+     */
     public static void sentenceNotice(String executor, String executed, String time, String reason) {
-        if (snEnable) {
-            Bukkit.broadcast(Component.text(snText
-                    .replace("%executor%", executor)
-                    .replace("%executed%", executed)
-                    .replace("%time%", time)
-                    .replace("%reason%", reason)));
+        if (Config.snEnable) {
+            Component message = Config.deserializeWithPlaceholders(
+                    Config.snText,
+                    "%executor%", executor,
+                    "%executed%", executed,
+                    "%time%", time,
+                    "%reason%", reason
+            );
+            Bukkit.broadcast(message);
         }
     }
 
-    public void execute(CommandSender sender, OfflinePlayer player, String reason, Long ms) {
+    /**
+     * 执行封禁
+     */
+    public static void executeBan(CommandSender sender, OfflinePlayer player, String reason, Long ms) {
         String senderName = sender.getName();
         String playerName = player.getName();
-        String dataText = DateProcess.getDataText(ms);
-        String formatReason = getReason(reason, dataText);
+        String timeText = DateProcess.getDataText(ms);
 
-        if (ms == 0) {
-            player.banPlayer(formatReason, senderName);// 永封
-        } else {
-            Date date = new Date(ms);
-            player.banPlayer(formatReason, date, senderName);
-        }
-        sender.sendMessage(prefix + "封禁" + playerName + "成功");
-        sentenceNotice(sender.getName(), playerName, dataText, reason);
+        // 执行ban，保存原始原因
+        // 如果玩家在线，ban() 会自动踢出，PlayerKickEvent 监听器会应用模板
+        Instant expiration = (ms == 0) ? null : Instant.ofEpochMilli(ms);
+        player.ban(reason, expiration, senderName);
+
+        sender.sendMessage(Config.prefix.append(
+                Config.deserializeWithPlaceholders("<green>成功封禁玩家 <white>" + playerName + "</white></green>")
+        ));
+        sentenceNotice(senderName, playerName, timeText, reason);
     }
 }

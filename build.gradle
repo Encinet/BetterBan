@@ -22,12 +22,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'io.papermc.paper:paper-api:1.19.2-R0.1-SNAPSHOT'
-    compileOnly 'com.mojang:brigadier:1.0.18'
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compileOnly('io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT')
 }
 
-def targetJavaVersion = 17
+def targetJavaVersion = 25
 java {
     def javaVersion = JavaVersion.toVersion(targetJavaVersion)
     sourceCompatibility = javaVersion

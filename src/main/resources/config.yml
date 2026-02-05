@@ -1,28 +1,33 @@
-prefix: " &l&6Better&fBan &r&8>> &r"
+prefix: "<bold><gold>Better</gold><white>Ban</white></bold> <dark_gray>>></dark_gray> "
+
 Sentence-notice:
   enable: true
   text: |-
-    ----- &l&6Better&fBan -----
-    &6处理者 &r&8>> &f%executor%
-    &6封禁玩家 &r&8>> &f%executed%
-    &6解封日期 &r&8>> &f%time%
-    &6原因 &r&8>> &f%reason%
+    ----- <bold><gold>Better</gold><white>Ban</white></bold> -----
+    <gold>处理者</gold> <dark_gray>>></dark_gray> <white>%executor%</white>
+    <gold>封禁玩家</gold> <dark_gray>>></dark_gray> <white>%executed%</white>
+    <gold>解封日期</gold> <dark_gray>>></dark_gray> <white>%time%</white>
+    <gold>原因</gold> <dark_gray>>></dark_gray> <white>%reason%</white>
+
 help:
-  - "&f----- &6Better&fban &e帮助 &f-----"
-  - "&6/bb &7<ID> &7<time> &e[reason] &f- 封禁玩家"
-  - "&6参数&etime&6说明&7:"
-  - "&6d: &6后接日期 格式为 &e年/月/日"
-  - "&a例子&7: &a2000/1/1"
-  - "&6l: &6后接时长 格式为 &e数字单位"
-  - "&a例子&7: &a1s 1m 1h 1d"
-  - "&6forever &e永封"
-  - "&f----- &eBy &6ObcbO &f-----"
+  - "<white>----- <gold>Better</gold><white>Ban</white> <yellow>帮助</yellow> -----</white>"
+  - "<gold>/ban</gold> <gray>或</gray> <gold>/bb</gold> <gray><玩家></gray> <gray><时间></gray> <yellow>[原因]</yellow> <white>- 封禁玩家</white>"
+  - "<gold>/banlist</gold> <gray>或</gray> <gold>/bblist</gold> <yellow>[页码]</yellow> <white>- 查看封禁列表</white>"
+  - "<gold>参数 <yellow>time</yellow> 说明:</gold>"
+  - "<gold>d:</gold> <gold>后接日期 格式为</gold> <yellow>年/月/日</yellow>"
+  - "<green>例子</green><gray>:</gray> <green>2000/1/1</green>"
+  - "<gold>l:</gold> <gold>后接时长 格式为</gold> <yellow>数字单位</yellow>"
+  - "<green>例子</green><gray>:</gray> <green>1s 1m 1h 1d</green>"
+  - "<gold>forever</gold> <yellow>永封</yellow>"
+  - "<white>----- <yellow>By</yellow> <gold>Noctiro</gold> -----</white>"
+
 reason: |-
-  &6米&f客
-  &7-------------------
-  &c你已被服务器封禁
-  &e原因
-  &e%reason%
-  &c解封日期: %time%
+  <gold>米</gold><white>客</white>
+  <gray>-------------------</gray>
+  <red>你已被服务器封禁</red>
+  <yellow>原因</yellow>
+  <yellow>%reason%</yellow>
+  <red>解封日期: %time%</red>
   如有异议 在QQ群1138627074向管理员申诉
-  &7-------------------
+  <gray>-------------------</gray>
+

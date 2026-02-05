@@ -1,0 +1,28 @@
+name: BetterBan
+version: '1.0'
+main: org.encinet.betterban.BetterBan
+api-version: '1.21'
+authors: [ Noctiro ]
+description: A modern ban plugin
+commands:
+  ban:
+    description: "Ban a player from the server."
+    usage: "/ban <player> <time> <reason>"
+    permission: bb.admin
+  banlist:
+    description: "View the list of banned players."
+    usage: "/banlist [page]"
+    permission: bb.admin
+permissions:
+  bb.admin:
+    description: "Allows access to all BetterBan commands."
+    default: op
+    children:
+      bb.ban: true
+      bb.banlist: true
+  bb.ban:
+    description: "Allows banning players."
+    default: op
+  bb.banlist:
+    description: "Allows viewing the ban list."
+    default: op
