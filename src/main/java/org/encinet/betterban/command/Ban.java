@@ -8,8 +8,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -34,8 +32,8 @@ public class Ban {
                     return Command.SINGLE_SUCCESS;
                 });
 
-        // /ban <player> <args>
-        command.then(Commands.argument("player", ArgumentTypes.player())
+        // /ban <player> <args> - 支持在线和离线玩家
+        command.then(Commands.argument("player", StringArgumentType.word())
                 .suggests(playerSuggestions())
                 .then(Commands.argument("args", StringArgumentType.greedyString())
                         .suggests(timeSuggestions())
@@ -48,9 +46,8 @@ public class Ban {
         CommandSender sender = ctx.getSource().getSender();
 
         try {
-            PlayerSelectorArgumentResolver resolver = ctx.getArgument("player", PlayerSelectorArgumentResolver.class);
-            Player targetPlayer = resolver.resolve(ctx.getSource()).getFirst();
-            OfflinePlayer player = Bukkit.getOfflinePlayer(targetPlayer.getUniqueId());
+            String playerName = ctx.getArgument("player", String.class);
+            OfflinePlayer player = Bukkit.getOfflinePlayer(playerName);
 
             if (player.isBanned()) {
                 sender.sendMessage(Config.prefix.append(
